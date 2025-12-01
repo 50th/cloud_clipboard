@@ -1,32 +1,32 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import check_password
 
 
 def get_clipboard_file_path(instance: models.FileField, filename):
     """生成剪贴板文件的保存路径。
-    
+
     为了确保文件名唯一，使用UUID生成新的文件名，并按照剪贴板ID进行目录组织。
-    
+
     Args:
         instance: ClipboardFile实例
         filename: 原始文件名
-        
+
     Returns:
         str: 生成的文件保存路径
     """
     # 使用UUID确保文件名唯一
-    ext = filename.split('.')[-1]
+    ext = filename.split(".")[-1]
     filename = f"{uuid.uuid4()}.{ext}"
     # 使用剪贴板ID作为目录名
-    return os.path.join('clipboard_files', str(instance.clipboard.id), filename)
-
+    return os.path.join("clipboard_files", str(instance.clipboard.id), filename)
 
 
 # 剪贴板权限枚举
 class ClipboardPermission(model.TextChoices):
-    PRIVATE = 'private', '私人'
-    PUBLISH = 'publish', '公开'
-    SHARED_PASSWORD = 'shared_password', '带密码共享'
+    PRIVATE = "private", "私人"
+    PUBLISH = "publish", "公开"
+    SHARED_PASSWORD = "shared_password", "带密码共享"
 
 
 # 剪切板文件模型
@@ -43,25 +43,26 @@ class ClipboardFile(models.Model):
         file_size: 文件大小（字节）
         created_at: 创建时间
     """
+
     clipboard = models.ForeignKey(
         Clipboard,
         on_delete=models.CASCADE,
-        related_name='files',
+        related_name="files",
     )
     uploaded_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='uploaded_files',
+        related_name="uploaded_files",
     )
     file_content = models.FileField(upload_to=get_clipboard_file_path)
     file_name = models.CharField(max_length=255)
     file_size = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f'File {self.id} - {self.file_name} (Clipboard: {self.clipboard.id})'
+    def __str__(self) -> str:
+        return f"File {self.id} - {self.file_name} (Clipboard: {self.clipboard.id})"
 
     def save(self, *args, **kwargs):
         """保存文件时自动更新文件名和大小。
@@ -92,10 +93,11 @@ class Clipboard(models.Model):
         updated_at: 更新时间
         expires_at: 过期时间（可空）
     """
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='clipboards',
+        related_name="clipboards",
     )
     title = models.CharField(max_length=128, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
@@ -120,7 +122,7 @@ class Clipboard(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='modified_clipboards',
+        related_name="modified_clipboards",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -128,7 +130,29 @@ class Clipboard(models.Model):
     expired_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'Clipboard {self.id} - {self.title or "Untitled"}'
+
+    def can_access(self, user=None, password=None) -> bool:
+        """检查用户是否有权限访问该剪贴板。
+
+        Args:
+            user: 要检查的用户对象（可选）
+            password: 共享密码（可选）
+
+        Returns:
+            bool: 如果有权限访问返回True，否则返回False
+        """
+        # 所有者永远可以访问
+        if user and user == self.user:
+            return True
+        # 公开的剪贴板任何人都可以访问
+        if self.permission == ClipboardPermission.PUBLISH:
+            return True
+        # 带密码共享的剪贴板需要密码验证
+        if self.permission == ClipboardPermission.SHARED_PASSWORD:
+            return password and check_password(password, self.share_password)
+
+        return False
