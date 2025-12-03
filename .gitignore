@@ -2,3 +2,4 @@
 __pycache__/
 logs
 clipboard_files
+db.sqlite3
