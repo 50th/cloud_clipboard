@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -37,13 +38,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'app_user',
+    'app_clipboard',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -69,6 +74,78 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'cloud_clipboard.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 不要包含 'rest_framework.authentication.SessionAuthentication'
+    ),
+}
+
+# JWT配置
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Access Token的有效期
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Refresh Token的有效期
+    
+    # 对于大部分情况，设置以上两项就可以了，以下为默认配置项目，可根据需要进行调整
+    
+    # 是否自动刷新Refresh Token
+    'ROTATE_REFRESH_TOKENS': False,  
+    # 刷新Refresh Token时是否将旧Token加入黑名单，如果设置为False，则旧的刷新令牌仍然可以用于获取新的访问令牌。需要将'rest_framework_simplejwt.token_blacklist'加入到'INSTALLED_APPS'的配置中
+    'BLACKLIST_AFTER_ROTATION': False,  
+    'ALGORITHM': 'HS256',  # 加密算法
+    'SIGNING_KEY': SECRET_KEY,  # 签名密匙，这里使用Django的SECRET_KEY
+
+    # 如为True，则在每次使用访问令牌进行身份验证时，更新用户最后登录时间
+    "UPDATE_LAST_LOGIN": False, 
+    # 用于验证JWT签名的密钥返回的内容。可以是字符串形式的密钥，也可以是一个字典。
+    "VERIFYING_KEY": "",
+    "AUDIENCE": None,# JWT中的"Audience"声明,用于指定该JWT的预期接收者。
+    "ISSUER": None, # JWT中的"Issuer"声明，用于指定该JWT的发行者。
+    "JSON_ENCODER": None, # 用于序列化JWT负载的JSON编码器。默认为Django的JSON编码器。
+    "JWK_URL": None, # 包含公钥的URL，用于验证JWT签名。
+    "LEEWAY": 0, # 允许的时钟偏差量，以秒为单位。用于在验证JWT的过期时间和生效时间时考虑时钟偏差。
+
+    # 用于指定JWT在HTTP请求头中使用的身份验证方案。默认为"Bearer"
+    "AUTH_HEADER_TYPES": ("Bearer",), 
+    # 包含JWT的HTTP请求头的名称。默认为"HTTP_AUTHORIZATION"
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION", 
+     # 用户模型中用作用户ID的字段。默认为"id"。
+    "USER_ID_FIELD": "id",
+     # JWT负载中包含用户ID的声明。默认为"user_id"。
+    "USER_ID_CLAIM": "user_id",
+    
+    # 用于指定用户身份验证规则的函数或方法。默认使用Django的默认身份验证方法进行身份验证。
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+
+    #  用于指定可以使用的令牌类。默认为"rest_framework_simplejwt.tokens.AccessToken"。
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    # JWT负载中包含令牌类型的声明。默认为"token_type"。
+    "TOKEN_TYPE_CLAIM": "token_type",
+    # 用于指定可以使用的用户模型类。默认为"rest_framework_simplejwt.models.TokenUser"。
+    "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
+
+    # JWT负载中包含JWT ID的声明。默认为"jti"。
+    "JTI_CLAIM": "jti",
+
+    # 在使用滑动令牌时，JWT负载中包含刷新令牌过期时间的声明。默认为"refresh_exp"。
+    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
+    # 滑动令牌的生命周期。默认为5分钟。
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
+    # 滑动令牌可以用于刷新的时间段。默认为1天。
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
+    # 用于生成访问令牌和刷新令牌的序列化器。
+    "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
+    # 用于刷新访问令牌的序列化器。默认
+    "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
+    # 用于验证令牌的序列化器。
+    "TOKEN_VERIFY_SERIALIZER": "rest_framework_simplejwt.serializers.TokenVerifySerializer",
+    # 用于列出或撤销已失效JWT的序列化器。
+    "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
+    # 用于生成滑动令牌的序列化器。
+    "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
+    # 用于刷新滑动令牌的序列化器。
+    "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -121,3 +198,113 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 日志配置
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        # 详细格式，包含时间、日志级别、模块名、行号、进程ID和线程ID
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        # 简单格式，仅包含时间、日志级别和消息
+        'simple': {
+            'format': '{levelname} {asctime} {message}',
+            'style': '{',
+        },
+        # JSON格式，便于日志分析工具处理
+        # 'json': {
+        #     'format': '{"timestamp": "{asctime}", "level": "{levelname}", "module": "{module}", "message": "{message}"}',
+        #     'style': '{',
+        # },
+    },
+    'filters': {
+        # 仅在DEBUG模式下记录的过滤器
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+        # 仅在DEBUG模式下不记录的过滤器
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+    },
+    'handlers': {
+        # 控制台输出
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        # 文件输出，记录所有级别日志
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'app.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10MB
+            'backupCount': 10,  # 保留10个备份文件
+            'formatter': 'verbose',
+        },
+        # 错误日志文件，仅记录ERROR级别日志
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'error.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10MB
+            'backupCount': 5,  # 保留5个备份文件
+            'formatter': 'verbose',
+        },
+        # 生产环境控制台输出
+        'prod_console': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        # 邮件通知（可选）
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        # 应用日志
+        'django': {
+            'handlers': ['console', 'file', 'error_file', 'prod_console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': True,
+        },
+        # 应用程序日志
+        'app_clipboard': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': os.getenv('APP_LOG_LEVEL', 'INFO'),
+            'propagate': True,
+        },
+        'app_user': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': os.getenv('APP_LOG_LEVEL', 'INFO'),
+            'propagate': True,
+        },
+        # 数据库查询日志
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': os.getenv('DB_LOG_LEVEL', 'WARNING'),
+            'propagate': False,
+        },
+        # 安全相关日志
+        'django.security': {
+            'handlers': ['file', 'error_file', 'mail_admins'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+    # 根日志配置
+    'root': {
+        'handlers': ['console', 'file', 'error_file'],
+        'level': os.getenv('ROOT_LOG_LEVEL', 'WARNING'),
+    },
+}

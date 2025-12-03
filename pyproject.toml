@@ -1,0 +1,15 @@
+[project]
+name = "cloud-clipboard"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "django==4.2.26",
+    "djangorestframework==3.16.1",
+    "djangorestframework-simplejwt>=5.5.1",
+]
+
+[[tool.uv.index]]
+name = "aliyun"
+url = "https://mirrors.aliyun.com/pypi/simple/"

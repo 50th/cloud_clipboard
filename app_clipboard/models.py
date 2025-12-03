@@ -1,3 +1,10 @@
+"""剪贴板应用的模型定义。
+
+该模块包含剪贴板应用的所有数据库模型，包括剪贴板和剪贴板文件。
+"""
+import uuid
+import os
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import check_password
@@ -23,7 +30,7 @@ def get_clipboard_file_path(instance: models.FileField, filename):
 
 
 # 剪贴板权限枚举
-class ClipboardPermission(model.TextChoices):
+class ClipboardPermission(models.TextChoices):
     PRIVATE = "private", "私人"
     PUBLISH = "publish", "公开"
     SHARED_PASSWORD = "shared_password", "带密码共享"
@@ -45,7 +52,7 @@ class ClipboardFile(models.Model):
     """
 
     clipboard = models.ForeignKey(
-        Clipboard,
+        "Clipboard",
         on_delete=models.CASCADE,
         related_name="files",
     )
@@ -106,7 +113,7 @@ class Clipboard(models.Model):
     # 权限控制
     permission = models.CharField(
         max_length=20,
-        choices=ClipboardPermission,
+        choices=ClipboardPermission.choices,
         default=ClipboardPermission.PRIVATE,
     )
     # 共享信息
