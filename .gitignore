@@ -1,5 +1,31 @@
-.venv
+# 通用
+node_modules/
+.env.local
+.DS_Store
 __pycache__/
-logs
-clipboard_files
-db.sqlite3
+
+# Backend (Django + uv)
+backend/.venv/
+backend/__pycache__/
+backend/*.pyc
+backend/db.sqlite3
+backend/logs/
+backend/clipboard_files/
+
+# Web (Vue)
+web/dist/
+web/.vite/
+
+# App (HarmonyOS)
+app/build/
+app/.preview/
+app/.hvigor/
+app/entry/src/main/resources/base/profile/
+app/oh_modules/
+app/hvigorw.bat
+app/hvigorw.sh
+
+# IDE
+.vscode/
+.idea/
+*.swp
