@@ -1,21 +1,7 @@
+from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
 from .models import Clipboard, ClipboardFile, ClipboardPermission
-
-
-# class UserProfileSerializer(serializers.ModelSerializer):
-#     """Serializer for user profile objects"""
-
-#     class Meta:
-#         model = UserProfile
-#         fields = ("id", "name", "email", "password")
-#         extra_kwargs = {"password": {"write_only": True, "min_length": 5}}
-
-#     def create(self, validated_data):
-#         """Create a new user profile"""
-#         user = UserProfile.objects.create_user(
-#             email=validated_data["email"],
-#         )
 
 
 class ClipboardFileSerializer(serializers.ModelSerializer):
@@ -52,6 +38,14 @@ class ClipboardFileSerializer(serializers.ModelSerializer):
 
 
 class ClipboardSerializer(serializers.ModelSerializer):
+    permission = serializers.ChoiceField(
+        choices=ClipboardPermission.choices,
+        required=True,
+        allow_null=False,
+        allow_blank=False,
+    )
+    share_password = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
+
     class Meta:
         model = Clipboard
         fields = (
@@ -60,8 +54,8 @@ class ClipboardSerializer(serializers.ModelSerializer):
             "text_content",
             "description",
             "permission",
-            "shared_id",
-            "shared_password",
+            "share_id",
+            "share_password",
             "expired_at",
             "created_at",
             "updated_at",
@@ -70,8 +64,40 @@ class ClipboardSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             "id",
-            "shared_id",
+            "share_id",
             "created_at",
             "user",
             "last_modified_by",
         )
+
+    def validate(self, attrs):
+        permission = attrs["permission"]
+        share_password = attrs.get("share_password")
+
+        if permission == ClipboardPermission.SHARED_PASSWORD and not share_password:
+            raise serializers.ValidationError(
+                {"share_password": "带密码共享时，密码不能为空"}
+            )
+        if (
+            permission is not None
+            and permission != ClipboardPermission.SHARED_PASSWORD
+            and share_password
+        ):
+            raise serializers.ValidationError(
+                {"share_password": "只有带密码共享类型才能设置密码"}
+            )
+        return attrs
+
+    def create(self, validated_data):
+        if validated_data["permission"] == ClipboardPermission.SHARED_PASSWORD and validated_data.get("share_password"):
+            validated_data["share_password"] = make_password(validated_data["share_password"])
+        elif "share_password" in validated_data:
+            validated_data["share_password"] = None
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        if validated_data["permission"] == ClipboardPermission.SHARED_PASSWORD and validated_data.get("share_password"):
+            validated_data["shared_password"] = make_password(validated_data["share_password"])
+        elif validated_data["permission"] != ClipboardPermission.SHARED_PASSWORD and "share_password" in validated_data:
+            validated_data["share_password"] = None
+        return super().update(instance, validated_data)

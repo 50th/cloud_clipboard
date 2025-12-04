@@ -1,18 +1,19 @@
 import logging
 
-from django.shortcuts import render
-from rest_framework import viewsets
-from rest_framework import permissions
+from rest_framework import viewsets, permissions
+from rest_framework.pagination import PageNumberPagination
 
 from .models import Clipboard, ClipboardFile
 from .serializers import ClipboardSerializer
+from .permissions import IsClipboardOwner
 
 logger = logging.getLogger(__name__)
 
 
 class ClipboardViewSet(viewsets.ModelViewSet):
     serializer_class = ClipboardSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsClipboardOwner]
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         queryset = Clipboard.objects.filter(user=self.request.user)
