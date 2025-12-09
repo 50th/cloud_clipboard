@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 class ClipboardViewSet(viewsets.ModelViewSet):
     serializer_class = ClipboardSerializer
     permission_classes = [permissions.IsAuthenticated, IsClipboardOwner]
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         queryset = Clipboard.objects.filter(user=self.request.user)

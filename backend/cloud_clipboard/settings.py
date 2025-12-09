@@ -87,6 +87,8 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 不要包含 'rest_framework.authentication.SessionAuthentication'
     ),
+    'DEFAULT_PAGINATION_CLASS': 'utils.custom_pagination.CustomPagination',
+    'PAGE_SIZE': 10,
     # 'EXCEPTION_HANDLER': 'utils.exception_handler.custom_exception_handler',
     'DEFAULT_RENDERER_CLASSES': (
         'utils.custom_render.CustomRenderer',
@@ -95,7 +97,7 @@ REST_FRAMEWORK = {
 
 # JWT配置
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Access Token的有效期
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=5),  # Access Token的有效期
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Refresh Token的有效期
     
     # 对于大部分情况，设置以上两项就可以了，以下为默认配置项目，可根据需要进行调整

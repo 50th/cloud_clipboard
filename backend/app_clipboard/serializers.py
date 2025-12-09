@@ -6,6 +6,7 @@ from .models import Clipboard, ClipboardFile, ClipboardPermission
 
 class ClipboardFileSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
 
     def get_file_url(self, obj):
         # 生成文件访问URL
@@ -45,6 +46,10 @@ class ClipboardSerializer(serializers.ModelSerializer):
         allow_blank=False,
     )
     share_password = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    updated_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    created_user = serializers.ReadOnlyField(source='user.username')
+    last_modified_user = serializers.ReadOnlyField(source='last_modified_by.username')
 
     class Meta:
         model = Clipboard
@@ -59,15 +64,16 @@ class ClipboardSerializer(serializers.ModelSerializer):
             "expired_at",
             "created_at",
             "updated_at",
-            "last_modified_by",
-            "user",
+            "created_user",
+            "last_modified_user",
         )
         read_only_fields = (
             "id",
             "share_id",
             "created_at",
-            "user",
-            "last_modified_by",
+            "updated_at",
+            "created_user",
+            "last_modified_user",
         )
 
     def validate(self, attrs):

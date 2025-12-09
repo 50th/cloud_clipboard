@@ -5,8 +5,8 @@
         <el-menu-item index="home">
           <span style="font-weight: bold; color: #d95f5f">Domo</span>
         </el-menu-item>
-        <el-menu-item index="articleList">
-          <span>文章</span>
+        <el-menu-item index="clipboardList">
+          <span>剪切板</span>
         </el-menu-item>
         <el-menu-item index="fileList">
           <span>文件</span>

@@ -106,7 +106,7 @@ class Clipboard(models.Model):
         on_delete=models.CASCADE,
         related_name="clipboards",
     )
-    title = models.CharField(max_length=128, blank=True, null=True)
+    title = models.CharField(max_length=128)
     description = models.TextField(blank=True, null=True)
     # 文本内容
     text_content = models.TextField(blank=True, null=True)

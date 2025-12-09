@@ -27,9 +27,14 @@ const router = createRouter({
       component: () => import('@/views/AboutView.vue'),
     },
     {
-      path: '/test',
-      name: 'test',
-      component: () => import('@/views/TestView.vue'),
+      path: '/clipboards',
+      name: 'clipboardList',
+      component: () => import('@/views/ClipboardViews/ClipboardList.vue'),
+    },
+    {
+      path: '/clipboards/:id',
+      name: 'clipboardIndex',
+      component: () => import('@/views/ClipboardViews/ClipboardIndex.vue'),
     },
     {
       path: '/login',
