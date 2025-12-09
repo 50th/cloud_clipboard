@@ -50,10 +50,7 @@ async function login(formEl: FormInstance | undefined) {
                 ElMessage.success('登录成功');
                 userStore.setUser(res.data);
                 router.push({ name: 'home' });
-            } else {
-                ElMessage.error(res.message);
             }
-            console.log('true');
         } else {
             ElMessage.error('请填写正确的用户名和密码');
             return false;

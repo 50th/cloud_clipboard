@@ -89,7 +89,7 @@ REST_FRAMEWORK = {
     ),
     # 'EXCEPTION_HANDLER': 'utils.exception_handler.custom_exception_handler',
     'DEFAULT_RENDERER_CLASSES': (
-        'utils.custom_render.CustomRender',
+        'utils.custom_render.CustomRenderer',
     )
 }
 
@@ -283,40 +283,40 @@ LOGGING = {
             'formatter': 'verbose',
         },
     },
-    'loggers': {
-        # 应用日志
-        'django': {
-            'handlers': ['console', 'file', 'error_file', 'prod_console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-            'propagate': True,
-        },
-        # 应用程序日志
-        'app_clipboard': {
-            'handlers': ['console', 'file', 'error_file'],
-            'level': os.getenv('APP_LOG_LEVEL', 'INFO'),
-            'propagate': True,
-        },
-        'app_user': {
-            'handlers': ['console', 'file', 'error_file'],
-            'level': os.getenv('APP_LOG_LEVEL', 'INFO'),
-            'propagate': True,
-        },
-        # 数据库查询日志
-        'django.db.backends': {
-            'handlers': ['console'],
-            'level': os.getenv('DB_LOG_LEVEL', 'WARNING'),
-            'propagate': False,
-        },
-        # 安全相关日志
-        'django.security': {
-            'handlers': ['file', 'error_file', 'mail_admins'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-    },
+    # 'loggers': {
+    #     # 应用日志
+    #     'django': {
+    #         'handlers': ['console', 'file', 'error_file', 'prod_console'],
+    #         'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+    #         'propagate': True,
+    #     },
+    #     # 应用程序日志
+    #     'app_clipboard': {
+    #         'handlers': ['console', 'file', 'error_file'],
+    #         'level': os.getenv('APP_LOG_LEVEL', 'INFO'),
+    #         'propagate': True,
+    #     },
+    #     'app_user': {
+    #         'handlers': ['console', 'file', 'error_file'],
+    #         'level': os.getenv('APP_LOG_LEVEL', 'INFO'),
+    #         'propagate': True,
+    #     },
+    #     # 数据库查询日志
+    #     'django.db.backends': {
+    #         'handlers': ['console'],
+    #         'level': os.getenv('DB_LOG_LEVEL', 'WARNING'),
+    #         'propagate': False,
+    #     },
+    #     # 安全相关日志
+    #     'django.security': {
+    #         'handlers': ['file', 'error_file', 'mail_admins'],
+    #         'level': 'INFO',
+    #         'propagate': False,
+    #     },
+    # },
     # 根日志配置
     'root': {
         'handlers': ['console', 'file', 'error_file'],
-        'level': os.getenv('ROOT_LOG_LEVEL', 'WARNING'),
+        'level': os.getenv('ROOT_LOG_LEVEL', 'INFO'),
     },
 }
