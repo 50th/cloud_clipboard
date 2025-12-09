@@ -1,4 +1,3 @@
-// index.ts
 import axios from 'axios'
 import type {
   AxiosInstance,
@@ -10,7 +9,7 @@ import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { baseUrl } from '@/utils/baseUrl'
 
-const userStore = useUserStore()
+let userStore = null
 
 type Result<T> = {
   code: number
@@ -34,7 +33,8 @@ export class Request {
 
     this.instance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        // 请求拦截里面加 token，用于后端的验证
+        // 请求拦截里面加 token，用于后端的验证+
+        userStore = useUserStore()
         const userInfo = userStore.getUser()
         if (userInfo) {
           config.headers!.Authorization = 'Bearer ' + userInfo.access
@@ -70,7 +70,9 @@ export class Request {
               break
             case 401:
               message = '未授权，请重新登录'
-              userStore.setUser(null)
+              if (userStore) {
+                userStore.setUser(null)
+              }
               break
             case 403:
               message = '拒绝访问(403)'

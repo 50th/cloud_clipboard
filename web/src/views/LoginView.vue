@@ -1,19 +1,32 @@
 <template>
-    <div>
-        <el-card>
-            <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" label-width="80px">
-                <el-form-item label="用户名" prop="username">
-                    <el-input v-model="loginForm.username" placeholder="请输入用户名"></el-input>
-                </el-form-item>
-                <el-form-item label="密码" prop="password">
-                    <el-input v-model="loginForm.password" placeholder="请输入密码" show-password></el-input>
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="login(loginFormRef)">登录</el-button>
-                </el-form-item>
-            </el-form>
-        </el-card>
-    </div>
+    <el-row style="margin-top: 3%;">
+        <el-col :span="6" :offset="9">
+            <el-card shadow="hover">
+                <template #header>
+                    <div class="login-header">
+                        <span>Domo</span>
+                    </div>
+                </template>
+                <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" style="padding: 5% 15% 0 15%;"
+                    label-width="auto" size="default">
+                    <el-form-item label="用户名" prop="username">
+                        <el-input v-model="loginForm.username" />
+                    </el-form-item>
+                    <el-form-item label="密码" prop="password">
+                        <el-input v-model="loginForm.password" type="password" show-password
+                            @keyup.enter="login(loginFormRef)" />
+                        <!-- <el-checkbox v-model="loginForm.save_password" :value="true">
+                            记住密码
+                        </el-checkbox> -->
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button style="margin: auto;" type="success" size="default" plain :auto-insert-space="true"
+                            @click="login(loginFormRef)">登录</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-card>
+        </el-col>
+    </el-row>
 </template>
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
