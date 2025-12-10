@@ -14,8 +14,7 @@ class ResponseCodes(Enum):
     USER_NOT_EXIST = (1004, '用户不存在')
     LOGIN_REQUIRED = (1005, '请登录')
 
-    MUST_BE_IMAGE = (2000, '请传入图片')
-    ARTICLE_NOT_EXIST = (2001, '文章不存在')
+    CLIPBOARD_NOT_EXIST = (2000, '剪切板不存在')
     MUST_BE_MARKDOWN = (2002, '请传入 MarkDown 文件')
     IMAGE_TOO_LARGE = (2003, '图片过大')
 

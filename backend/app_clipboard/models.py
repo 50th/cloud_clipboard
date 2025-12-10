@@ -98,12 +98,13 @@ class Clipboard(models.Model):
         share_id: 唯一共享标识符
         created_at: 创建时间
         updated_at: 更新时间
-        expires_at: 过期时间（可空）
+        expired_at: 过期时间（可空）
     """
 
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
         related_name="clipboards",
     )
     title = models.CharField(max_length=128)
@@ -115,8 +116,6 @@ class Clipboard(models.Model):
         max_length=20,
         choices=ClipboardPermission.choices,
         default=ClipboardPermission.PRIVATE,
-        null=False,
-        blank=False,
     )
     # 共享信息
     share_password = models.CharField(max_length=64, blank=True, null=True)
@@ -161,7 +160,7 @@ class Clipboard(models.Model):
         if self.permission == ClipboardPermission.PUBLISH:
             return True
         # 带密码共享的剪贴板需要密码验证
-        if self.permission == ClipboardPermission.SHARED_PASSWORD:
-            return password and check_password(password, self.share_password)
+        if self.permission == ClipboardPermission.SHARED_PASSWORD and password == self.share_password:
+            return True
 
         return False

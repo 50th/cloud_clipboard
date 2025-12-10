@@ -38,18 +38,38 @@ class ClipboardFileSerializer(serializers.ModelSerializer):
         )
 
 
-class ClipboardSerializer(serializers.ModelSerializer):
+class ClipboardListSerializer(serializers.ModelSerializer):
     permission = serializers.ChoiceField(
         choices=ClipboardPermission.choices,
         required=True,
         allow_null=False,
         allow_blank=False,
     )
+    permission_display = serializers.ReadOnlyField(source="get_permission_display", read_only=True)
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    updated_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    created_user = serializers.ReadOnlyField(source='user.username', read_only=True)
+    last_modified_user = serializers.ReadOnlyField(source='last_modified_by.username', read_only=True)
+
+    class Meta:
+        model = Clipboard
+        fields = (
+            "id",
+            "title",
+            "description",
+            "permission",
+            "permission_display",
+            "share_id",
+            "expired_at",
+            "created_at",
+            "updated_at",
+            "created_user",
+            "last_modified_user",
+        )
+
+
+class ClipboardSerializer(ClipboardListSerializer):
     share_password = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
-    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
-    updated_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
-    created_user = serializers.ReadOnlyField(source='user.username')
-    last_modified_user = serializers.ReadOnlyField(source='last_modified_by.username')
 
     class Meta:
         model = Clipboard
@@ -95,15 +115,13 @@ class ClipboardSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        if validated_data["permission"] == ClipboardPermission.SHARED_PASSWORD and validated_data.get("share_password"):
-            validated_data["share_password"] = make_password(validated_data["share_password"])
-        elif "share_password" in validated_data:
+        if validated_data["permission"] != ClipboardPermission.SHARED_PASSWORD and validated_data.get("share_password"):
             validated_data["share_password"] = None
         return super().create(validated_data)
     
     def update(self, instance, validated_data):
-        if validated_data["permission"] == ClipboardPermission.SHARED_PASSWORD and validated_data.get("share_password"):
-            validated_data["shared_password"] = make_password(validated_data["share_password"])
-        elif validated_data["permission"] != ClipboardPermission.SHARED_PASSWORD and "share_password" in validated_data:
+        if instance.permission != validated_data["permission"]:
+            pass
+        if validated_data["permission"] != ClipboardPermission.SHARED_PASSWORD and validated_data.get("share_password"):
             validated_data["share_password"] = None
         return super().update(instance, validated_data)

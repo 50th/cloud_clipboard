@@ -1,42 +1,62 @@
 import logging
 
-from rest_framework import viewsets, permissions
-from rest_framework.pagination import PageNumberPagination
+from django.db.models import Q
+from django.http import Http404
+from rest_framework import viewsets, permissions, status
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Clipboard, ClipboardFile
-from .serializers import ClipboardSerializer
-from .permissions import IsClipboardOwner
+from constants.response_codes import ResponseCodes
+from .models import Clipboard, ClipboardFile, ClipboardPermission
+from .serializers import ClipboardSerializer, ClipboardListSerializer
+from .permissions import HasClipboardPermission
 
 logger = logging.getLogger(__name__)
 
 
 class ClipboardViewSet(viewsets.ModelViewSet):
     serializer_class = ClipboardSerializer
-    permission_classes = [permissions.IsAuthenticated, IsClipboardOwner]
+    authentication_classes = [JWTAuthentication, ]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Clipboard.objects.filter(user=self.request.user)
-        permission = self.request.query_params.get("permission", None)
-        logger.info("permission: %s", permission)
-        if permission:
-            queryset = queryset.filter(permission=permission)
+        if self.action == "list":
+            queryset = Clipboard.objects.filter(user=self.request.user)
+        else:
+            queryset = Clipboard.objects.all()
         return queryset
 
+    def get_serializer_class(self):
+        if self.action == "list":
+            return ClipboardListSerializer
+        return ClipboardSerializer
+
     def perform_create(self, serializer):
-        logger.info("create clipboard")
-        clipboard = serializer.save(user=self.request.user, last_modified_by=self.request.user)
-        # 处理上传的文件
-        logger.info("create clipboard files: %s", self.request.FILES)
-        if "file_content" in self.request.FILES:
-            ClipboardFile.objects.create(
-                clipboard=clipboard,
-                file_content=self.request.FILES["file_content"],
-                uploaded_by=self.request.user,
-            )
-        elif "file_contents" in self.request.FILES:
-            for file_content in self.request.FILES.getlist("file_contents"):
-                ClipboardFile.objects.create(
-                    clipboard=clipboard,
-                    file_content=file_content,
-                    uploaded_by=self.request.user,
-                )
+        serializer.save(user=self.request.user, last_modified_by=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        try:
+            instance = self.get_object()
+        except Http404:
+            return Response(ResponseCodes.CLIPBOARD_NOT_EXIST)
+
+        if instance.user != self.request.user:
+            return Response(ResponseCodes.PERMISSION_DENIED)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.validated_data["last_modified_by"] = request.user
+        self.perform_update(serializer)
+
+        if getattr(instance, "_prefetched_objects_cache", None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
