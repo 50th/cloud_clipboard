@@ -35,6 +35,21 @@ class ClipboardViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user, last_modified_by=self.request.user)
 
+    def retrieve(self, request, *args, **kwargs):
+        """
+        获取剪切板，支持主键或 share id 查询
+        """
+        clipboard_id = kwargs.get('pk')
+
+        if clipboard_id.isnumeric():
+            instance = Clipboard.objects.filter(id=clipboard_id).first()
+        else:
+            instance = Clipboard.objects.filter(share_id=clipboard_id).first()
+        if not instance:
+            return Response(ResponseCodes.CLIPBOARD_NOT_EXIST)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
         try:
@@ -57,6 +72,11 @@ class ClipboardViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
+        try:
+            instance = self.get_object()
+        except Http404:
+            return Response(ResponseCodes.CLIPBOARD_NOT_EXIST)
+        if instance.user != self.request.user:
+            return Response(ResponseCodes.PERMISSION_DENIED)
         self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(ResponseCodes.OK)

@@ -1,4 +1,3 @@
-from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
 from .models import Clipboard, ClipboardFile, ClipboardPermission
@@ -70,6 +69,7 @@ class ClipboardListSerializer(serializers.ModelSerializer):
 
 class ClipboardSerializer(ClipboardListSerializer):
     share_password = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
+    clipboard_files = ClipboardFileSerializer(many=True, read_only=True)
 
     class Meta:
         model = Clipboard
@@ -86,6 +86,7 @@ class ClipboardSerializer(ClipboardListSerializer):
             "updated_at",
             "created_user",
             "last_modified_user",
+            "clipboard_files",
         )
         read_only_fields = (
             "id",
@@ -104,14 +105,14 @@ class ClipboardSerializer(ClipboardListSerializer):
             raise serializers.ValidationError(
                 {"share_password": "带密码共享时，密码不能为空"}
             )
-        if (
-            permission is not None
-            and permission != ClipboardPermission.SHARED_PASSWORD
-            and share_password
-        ):
-            raise serializers.ValidationError(
-                {"share_password": "只有带密码共享类型才能设置密码"}
-            )
+        # if (
+        #     permission is not None
+        #     and permission != ClipboardPermission.SHARED_PASSWORD
+        #     and share_password
+        # ):
+        #     raise serializers.ValidationError(
+        #         {"share_password": "只有带密码共享类型才能设置密码"}
+        #     )
         return attrs
 
     def create(self, validated_data):

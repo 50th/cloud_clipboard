@@ -27,6 +27,11 @@ const router = createRouter({
       component: () => import('@/views/AboutView.vue'),
     },
     {
+      path: '/add-clipboards',
+      name: 'addClipboard',
+      component: () => import('@/views/ClipboardViews/AddClipboard.vue'),
+    },
+    {
       path: '/clipboards',
       name: 'clipboardList',
       component: () => import('@/views/ClipboardViews/ClipboardList.vue'),

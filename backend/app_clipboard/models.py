@@ -33,7 +33,7 @@ def get_clipboard_file_path(instance: models.FileField, filename):
 class ClipboardPermission(models.TextChoices):
     PRIVATE = "private", "私人"
     PUBLISH = "publish", "公开"
-    SHARED_PASSWORD = "shared_password", "带密码共享"
+    SHARED_PASSWORD = "shared_password", "密码共享"
 
 
 # 剪切板文件模型

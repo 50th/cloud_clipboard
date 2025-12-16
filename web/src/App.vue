@@ -8,8 +8,8 @@
         <el-menu-item index="clipboardList">
           <span>剪切板</span>
         </el-menu-item>
-        <el-menu-item index="fileList">
-          <span>文件</span>
+        <el-menu-item index="addClipboard">
+          <span>添加剪切板</span>
         </el-menu-item>
         <el-menu-item index="wallpaperList">
           <span>壁纸</span>
