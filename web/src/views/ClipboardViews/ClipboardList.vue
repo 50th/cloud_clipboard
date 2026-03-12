@@ -58,7 +58,7 @@ const clipboardList = ref<Clipboard[]>([]);
 const clipboardCount = ref(0);
 
 function goClipboardDetails(shareID: string) {
-    router.push({ name: 'clipboardIndex', params: { id: shareID } });
+    router.push({ name: 'editClipboard', params: { id: shareID } });
 }
 
 async function delClipboard(id: number) {

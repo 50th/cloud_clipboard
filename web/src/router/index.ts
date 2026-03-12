@@ -38,8 +38,8 @@ const router = createRouter({
     },
     {
       path: '/clipboards/:id',
-      name: 'clipboardIndex',
-      component: () => import('@/views/ClipboardViews/ClipboardIndex.vue'),
+      name: 'editClipboard',
+      component: () => import('@/views/ClipboardViews/EditClipboard.vue'),
     },
     {
       path: '/login',

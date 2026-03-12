@@ -11,15 +11,6 @@
         <el-menu-item index="addClipboard">
           <span>添加剪切板</span>
         </el-menu-item>
-        <el-menu-item index="wallpaperList">
-          <span>壁纸</span>
-        </el-menu-item>
-        <el-menu-item v-if="userInfo && userInfo.is_superuser" index="videoList">
-          <span>视频</span>
-        </el-menu-item>
-        <el-menu-item v-if="userInfo && userInfo.is_superuser" index="tool">
-          <span>工具</span>
-        </el-menu-item>
         <el-menu-item index="about">
           <span>关于</span>
         </el-menu-item>

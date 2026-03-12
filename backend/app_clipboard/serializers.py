@@ -47,8 +47,8 @@ class ClipboardListSerializer(serializers.ModelSerializer):
     permission_display = serializers.ReadOnlyField(source="get_permission_display", read_only=True)
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
     updated_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
-    created_user = serializers.ReadOnlyField(source='user.username', read_only=True)
-    last_modified_user = serializers.ReadOnlyField(source='last_modified_by.username', read_only=True)
+    created_username = serializers.ReadOnlyField(source='user.username', read_only=True)
+    last_modified_username = serializers.ReadOnlyField(source='last_modified_by.username', read_only=True)
 
     class Meta:
         model = Clipboard
@@ -62,8 +62,8 @@ class ClipboardListSerializer(serializers.ModelSerializer):
             "expired_at",
             "created_at",
             "updated_at",
-            "created_user",
-            "last_modified_user",
+            "created_username",
+            "last_modified_username",
         )
 
 
@@ -84,8 +84,9 @@ class ClipboardSerializer(ClipboardListSerializer):
             "expired_at",
             "created_at",
             "updated_at",
-            "created_user",
-            "last_modified_user",
+            "user",
+            "created_username",
+            "last_modified_username",
             "clipboard_files",
         )
         read_only_fields = (
@@ -93,8 +94,8 @@ class ClipboardSerializer(ClipboardListSerializer):
             "share_id",
             "created_at",
             "updated_at",
-            "created_user",
-            "last_modified_user",
+            "created_username",
+            "last_modified_username",
         )
 
     def validate(self, attrs):

@@ -61,6 +61,8 @@ class ClipboardViewSet(viewsets.ModelViewSet):
             return Response(ResponseCodes.PERMISSION_DENIED)
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
+        if instance.permission != serializer.validated_data["permission"] and instance.user != self.request.user:
+            return Response(ResponseCodes.PERMISSION_DENIED)
         serializer.validated_data["last_modified_by"] = request.user
         self.perform_update(serializer)
 
